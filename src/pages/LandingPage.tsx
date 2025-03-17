@@ -1,69 +1,74 @@
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import users from '../users.json';
-import type { User } from '../types';
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import users from "../users.json";
+import type { User } from "../types";
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme ? savedTheme === 'dark' : prefersDark;
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    return savedTheme ? savedTheme === "dark" : prefersDark;
   });
   const [loginData, setLoginData] = useState({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
   const [signupData, setSignupData] = useState({
-    username: '',
-    password: '',
-    dateOfBirth: '',
-    email: '',
+    username: "",
+    password: "",
+    dateOfBirth: "",
+    email: "",
   });
 
   useEffect(() => {
     // Apply theme on mount
     if (isDarkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, []);
 
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    document.documentElement.classList.toggle('dark');
+    localStorage.setItem("theme", newTheme ? "dark" : "light");
+    document.documentElement.classList.toggle("dark");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginData.username || !loginData.password) {
-      setError('All fields are required');
+      setError("All fields are required");
       return;
     }
 
     try {
-      const user = users.find(u => 
-        u.name === loginData.username && 
-        u.password === loginData.password
+      const user = users.find(
+        (u) =>
+          u.name === loginData.username && u.password === loginData.password
       );
 
       if (user) {
-        localStorage.setItem('user', JSON.stringify({
-          name: user.name,
-          email: user.email
-        }));
-        navigate('/dashboard');
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: user.name,
+            email: user.email,
+          })
+        );
+        navigate("/dashboard");
       } else {
-        setError('Invalid username or password');
+        setError("Invalid username or password");
       }
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError('Error during login. Please try again.');
+      console.error("Login error:", err);
+      setError("Error during login. Please try again.");
     }
   };
 
@@ -72,25 +77,33 @@ const LandingPage: React.FC = () => {
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
       age--;
     }
-    
+
     return age;
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signupData.username || !signupData.password || !signupData.dateOfBirth || !signupData.email) {
-      setError('All fields are required');
+    if (
+      !signupData.username ||
+      !signupData.password ||
+      !signupData.dateOfBirth ||
+      !signupData.email
+    ) {
+      setError("All fields are required");
       return;
     }
 
     try {
       // Check if username already exists
-      if (users.some(u => u.name === signupData.username)) {
-        setError('Username already exists');
+      if (users.some((u) => u.name === signupData.username)) {
+        setError("Username already exists");
         return;
       }
 
@@ -103,52 +116,55 @@ const LandingPage: React.FC = () => {
         password: signupData.password,
         email: signupData.email,
         dateOfBirth: signupData.dateOfBirth,
-        age
+        age,
       };
 
       // Add user to users array and update the file
       const updatedUsers = [...users, newUser];
-      
+
       // Update the users.json file
-      const response = await fetch('/api/users', {
-        method: 'POST',
+      const response = await fetch("https://kodjobs.onrender.com/api/users", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedUsers),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save user');
+        throw new Error("Failed to save user");
       }
 
       // Update the imported users array
       users.push(newUser);
 
       // Store user data in localStorage
-      localStorage.setItem('user', JSON.stringify({
-        name: signupData.username,
-        email: signupData.email
-      }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: signupData.username,
+          email: signupData.email,
+        })
+      );
 
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err: any) {
-      console.error('Signup error:', err);
-      setError('Error during signup. Please try again.');
+      console.error("Signup error:", err);
+      setError("Error during signup. Please try again.");
     }
   };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    show: { 
-      opacity: 1, 
+    show: {
+      opacity: 1,
       y: 0,
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 10
-      }
-    }
+        damping: 10,
+      },
+    },
   };
 
   const staggerContainer = {
@@ -157,13 +173,17 @@ const LandingPage: React.FC = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.1,
-        delayChildren: 0.2
-      }
-    }
+        delayChildren: 0.2,
+      },
+    },
   };
 
   return (
-    <div className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-accent-800' : 'bg-accent-50'}`}>
+    <div
+      className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
+        isDarkMode ? "bg-accent-800" : "bg-accent-50"
+      }`}
+    >
       {/* Theme Toggle Button */}
       <motion.button
         initial={{ opacity: 0, scale: 0.5 }}
@@ -171,17 +191,43 @@ const LandingPage: React.FC = () => {
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
         onClick={toggleTheme}
         className={`fixed top-4 right-4 z-50 p-2 rounded-full transition-all duration-200
-          ${isDarkMode ? 'bg-accent-700 text-accent-200' : 'bg-accent-200 text-accent-700'}`}
+          ${
+            isDarkMode
+              ? "bg-accent-700 text-accent-200"
+              : "bg-accent-200 text-accent-700"
+          }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
         {isDarkMode ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+            />
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+            />
           </svg>
         )}
       </motion.button>
@@ -193,15 +239,17 @@ const LandingPage: React.FC = () => {
           initial="hidden"
           animate="show"
           className={`w-[60%] p-12 flex flex-col justify-center items-center ${
-            isDarkMode ? 'bg-accent-900/50' : 'bg-white/50'
+            isDarkMode ? "bg-accent-900/50" : "bg-white/50"
           } backdrop-blur-sm`}
         >
           <motion.h1
             variants={fadeInUp}
-            className={`text-6xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-accent-900'}`}
+            className={`text-6xl font-bold mb-4 ${
+              isDarkMode ? "text-white" : "text-accent-900"
+            }`}
           >
             Welcome to{" "}
-            <motion.span 
+            <motion.span
               className="gradient-text"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -212,10 +260,12 @@ const LandingPage: React.FC = () => {
           <motion.p
             variants={fadeInUp}
             className={`text-xl mb-12 max-w-xl text-center ${
-              isDarkMode ? 'text-accent-300' : 'text-accent-600'
+              isDarkMode ? "text-accent-300" : "text-accent-600"
             }`}
           >
-            Your professional gateway to discovering exceptional career opportunities. Join thousands of successful job seekers who found their dream positions through our platform.
+            Your professional gateway to discovering exceptional career
+            opportunities. Join thousands of successful job seekers who found
+            their dream positions through our platform.
           </motion.p>
           <motion.div
             variants={fadeInUp}
@@ -235,9 +285,14 @@ const LandingPage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.3 }}
+          transition={{
+            type: "spring",
+            stiffness: 100,
+            damping: 20,
+            delay: 0.3,
+          }}
           className={`w-[40%] p-12 flex flex-col justify-center ${
-            isDarkMode ? 'bg-accent-800/50' : 'bg-accent-100/50'
+            isDarkMode ? "bg-accent-800/50" : "bg-accent-100/50"
           } backdrop-blur-sm`}
         >
           {/* Login Section */}
@@ -255,11 +310,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Enter your username"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={loginData.username}
-                onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, username: e.target.value })
+                }
               />
               <input
                 type="password"
@@ -267,11 +324,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Enter your password"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, password: e.target.value })
+                }
               />
               <motion.button
                 type="submit"
@@ -292,8 +351,8 @@ const LandingPage: React.FC = () => {
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
               className={`mb-8 p-4 rounded-lg text-center ${
                 isDarkMode
-                  ? 'bg-red-500/10 border border-red-500/30 text-red-200'
-                  : 'bg-red-50 border border-red-200 text-red-500'
+                  ? "bg-red-500/10 border border-red-500/30 text-red-200"
+                  : "bg-red-50 border border-red-200 text-red-500"
               }`}
             >
               {error}
@@ -301,21 +360,29 @@ const LandingPage: React.FC = () => {
           )}
 
           {/* Divider with animation */}
-          <motion.div 
+          <motion.div
             className="relative mb-8"
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
             transition={{ delay: 0.5 }}
           >
             <div className="absolute inset-0 flex items-center">
-              <div className={`w-full border-t ${isDarkMode ? 'border-accent-700' : 'border-accent-300'}`}></div>
+              <div
+                className={`w-full border-t ${
+                  isDarkMode ? "border-accent-700" : "border-accent-300"
+                }`}
+              ></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <motion.span 
+              <motion.span
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className={`px-2 ${isDarkMode ? 'bg-accent-800/50 text-accent-400' : 'bg-accent-100/50 text-accent-500'}`}
+                className={`px-2 ${
+                  isDarkMode
+                    ? "bg-accent-800/50 text-accent-400"
+                    : "bg-accent-100/50 text-accent-500"
+                }`}
               >
                 or
               </motion.span>
@@ -330,7 +397,11 @@ const LandingPage: React.FC = () => {
             animate="show"
             transition={{ delay: 0.7 }}
           >
-            <h2 className={`text-2xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-accent-900'}`}>
+            <h2
+              className={`text-2xl font-semibold mb-6 ${
+                isDarkMode ? "text-white" : "text-accent-900"
+              }`}
+            >
               New User?
             </h2>
             <div className="space-y-4">
@@ -340,11 +411,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Choose a username"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={signupData.username}
-                onChange={(e) => setSignupData({ ...signupData, username: e.target.value })}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, username: e.target.value })
+                }
               />
               <input
                 type="password"
@@ -352,11 +425,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Create a password"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={signupData.password}
-                onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, password: e.target.value })
+                }
               />
               <input
                 type="date"
@@ -364,11 +439,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Date of Birth"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={signupData.dateOfBirth}
-                onChange={(e) => setSignupData({ ...signupData, dateOfBirth: e.target.value })}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, dateOfBirth: e.target.value })
+                }
               />
               <input
                 type="email"
@@ -376,11 +453,13 @@ const LandingPage: React.FC = () => {
                 placeholder="Enter your email"
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500 transition-all duration-300 ${
                   isDarkMode
-                    ? 'bg-accent-900/50 border-accent-700 text-white placeholder-accent-400'
-                    : 'bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500'
+                    ? "bg-accent-900/50 border-accent-700 text-white placeholder-accent-400"
+                    : "bg-white/50 border-accent-200 text-accent-900 placeholder-accent-500"
                 }`}
                 value={signupData.email}
-                onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                onChange={(e) =>
+                  setSignupData({ ...signupData, email: e.target.value })
+                }
               />
               <motion.button
                 type="submit"
@@ -401,8 +480,8 @@ const LandingPage: React.FC = () => {
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
               className={`mt-4 p-4 rounded-lg text-center ${
                 isDarkMode
-                  ? 'bg-red-500/10 border border-red-500/30 text-red-200'
-                  : 'bg-red-50 border border-red-200 text-red-500'
+                  ? "bg-red-500/10 border border-red-500/30 text-red-200"
+                  : "bg-red-50 border border-red-200 text-red-500"
               }`}
             >
               {error}
@@ -414,4 +493,4 @@ const LandingPage: React.FC = () => {
   );
 };
 
-export default LandingPage; 
+export default LandingPage;
