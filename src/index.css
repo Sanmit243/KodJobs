@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --gradient-start: theme('colors.primary.500');
+    --gradient-end: theme('colors.primary.600');
+    --bg-pattern-opacity: 0.03;
+  }
+
+  .dark {
+    --gradient-start: theme('colors.primary.400');
+    --gradient-end: theme('colors.primary.500');
+    --bg-pattern-opacity: 0.05;
+  }
+
+  body {
+    @apply bg-accent-50 text-accent-900 min-h-screen font-sans transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-accent-800 text-white;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-2 rounded-lg border transition-all duration-200 shadow-sm hover:shadow-md
+           dark:bg-accent-700/50 dark:border-accent-600/50 dark:text-white dark:placeholder-accent-400
+           dark:focus:ring-primary-400 dark:focus:border-primary-400
+           bg-white/80 border-accent-200 focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-2 rounded-lg font-medium shadow-lg transition-all duration-300
+           bg-primary-600 hover:bg-primary-500 text-white transform hover:-translate-y-0.5
+           dark:bg-primary-500 dark:hover:bg-primary-400
+           hover:shadow-xl active:shadow-md active:translate-y-0;
+  }
+
+  .card {
+    @apply p-6 rounded-xl shadow-lg transition-all duration-300
+           bg-white/80 border border-accent-200/50 hover:border-primary-400/50
+           dark:bg-accent-700/50 dark:border-accent-600/50 dark:hover:border-primary-500/50
+           backdrop-blur-sm hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r transition-all duration-300
+           from-[var(--gradient-start)] to-[var(--gradient-end)]
+           hover:scale-105 cursor-pointer;
+  }
+
+  .glass-panel {
+    @apply backdrop-blur-sm border rounded-xl shadow-lg transition-all duration-300
+           bg-white/80 border-accent-200/50
+           dark:bg-accent-700/50 dark:border-accent-600/50;
+  }
+
+  .bg-pattern {
+    @apply fixed inset-0 bg-subtle-grid pointer-events-none transition-opacity duration-300;
+    opacity: var(--bg-pattern-opacity);
+  }
+}
+
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-glow {
+    text-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
+  }
+}
